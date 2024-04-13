@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ecommerce website</title>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/products">Products</a>
+        <a href="/customers">Customers</a>
+      </nav>
+    </header>
+    <main>
+      <h1>Home</h1>
+      <p>Welcome to our ecommerce website developed by - {{ name }}</p>
+      <ul>
+        {% for element in passed_value %}
+        <li>list item :{{ element }}</li>
+        {% endfor %}
+      </ul>
+    </main>
+    <footer>
+      <p>&copy; 2020 Ecommerce website</p>
+    </footer>
+  </body>
+</html>
