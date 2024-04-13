@@ -1,3 +1,4 @@
+{% extends "base.html" %} {% block content %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -6,13 +7,6 @@
     <title>Ecommerce website</title>
   </head>
   <body>
-    <header>
-      <nav>
-        <a href="/">Home</a>
-        <a href="/products">Products</a>
-        <a href="/customers">Customers</a>
-      </nav>
-    </header>
     <main>
       <h1>Home</h1>
       <p>Welcome to our ecommerce website developed by - {{ name }}</p>
@@ -23,7 +17,8 @@
       </ul>
     </main>
     <footer>
-      <p>&copy; 2020 Ecommerce website</p>
+      <p>&copy; 2024 Ecommerce website</p>
     </footer>
   </body>
 </html>
+{% endblock %}

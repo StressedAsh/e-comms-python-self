@@ -1,11 +1,24 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <h1>Customers</h1>
-{% for customer in customers %}
-<p>
-    <span>{{ customer.name }}</span>
-    <span>{{ customer.phone }}</span>
-</p>
-{% endfor %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Customer ID</th>
+      <th scope="col">Customer Name</th>
+      <th scope="col">Customer Phone</th>
+      <th scope="col">Customer Balance</th>
+      <th scope="col">Customer Details</th>
+      <th scope="col">Delete Customer</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for customer in customers %}
+    <tr>
+      <th scope="row">{{ customer.id }}</th>
+      <td>{{ customer.name }}</td>
+      <td>{{ customer.phone }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

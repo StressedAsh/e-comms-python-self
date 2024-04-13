@@ -1,0 +1,42 @@
+{% extends "base.html" %} {% block content %}
+<h1>Orders</h1>
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Order ID</th>
+      <th scope="col">Customer Name</th>
+      <th scope="col">Total</th>
+      <th scope="col">Created at</th>
+      <th scope="col">Order Condition</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <th scope="row">{{order.id}}</th>
+      <td>{{order.customer.name}}</td>
+      <td>${{order.total()}}</td>
+      <td>{{order.created_at}}</td>
+      <td>
+        {% if order.processed %}
+        <p class="text-success">Confirmed</p>
+        {% else %}
+        <p class="text-danger">Not processed</p>
+        {% endif %}
+      </td>
+      <td>
+        <a href="{{url_for('html.orders_info', id=order.id)}}">Details</a>
+      </td>
+      <td>
+        <form
+          method="POST"
+          action="{{ url_for('api_orders.delete_order', id=order.id) }}"
+        >
+          <button type="submit" class="btn btn-primary">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

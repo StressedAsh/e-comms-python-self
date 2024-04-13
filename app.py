@@ -5,17 +5,27 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    list1 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
-    return render_template('index.html', name='Ashutosh Dhatwalia',passed_value = list1) 
+    return render_template('index.html', name='Ashutosh Dhatwalia') 
 
-@app.route("/customers")
+@app.route("/customers")    # read customer data from csv and use csv.dictreader to display the data in a table
 def customers():
-    with open ('data/customers.csv', 'r') as file:
-        reader = csv.reader(file) # reader object -> list of lists for all the items in the csv files, puts every line in a list and wraps that in 1 list
-        customers = list(reader)
-        print(customers)
+    customers_info = []
+    with open('./data/customers.csv', 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            customers_info.append(row)
 
-    return render_template('customers.html')
+    return render_template('customers.html', customers = customers_info)
+
+@app.route("/products")   # read product data from csv and use csv.dictreader to display the data in a table
+def products():
+    products_info = []
+    with open('./data/products.csv', 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            products_info.append(row)
+
+    return render_template('products.html', products = products_info)
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
