@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from db import db
-
+from models import Product, Customer
 import csv
 from pathlib import Path
 
@@ -21,23 +21,11 @@ def home():
 
 @app.route("/customers")    # read customer data from csv and use csv.dictreader to display the data in a table
 def customers():
-    customers_info = []
-    with open('./data/customers.csv', 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            customers_info.append(row)
-
-    return render_template('customers.html', customers = customers_info)
+    return render_template('customers.html', customers = Customer.query.all())
 
 @app.route("/products")   # read product data from csv and use csv.dictreader to display the data in a table
 def products():
-    products_info = []
-    with open('./data/products.csv', 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            products_info.append(row)
-
-    return render_template('products.html', products = products_info)
+    return render_template('products.html', products = Product.query.all())
 
 
 # this the limit, remove everything above this to put this to another file.

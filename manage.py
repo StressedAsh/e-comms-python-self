@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Float, Numeric, ForeignKey, Integer, String, Column, DECIMAL
 from sqlalchemy.orm import relationship, mapped_column
-import models
+from models import Customer, Product
 from db import db
 from app import app
 import csv
@@ -19,7 +19,7 @@ def customer_table_data():  # this function will be used to populate the custome
         with open('./data/customers.csv', 'r', newline="") as file:
             reader = csv.DictReader(file)
             for i in reader:
-                customer = models.Customer(name=i['name'], phone=i['phone'], balance=(1,1000))
+                customer = Customer(name=i['name'], phone=i['phone'], balance=(random.randint(1,999))) # balance is a random number between 200 and 10000
                 db.session.add(customer)
             db.session.commit()    
 
@@ -28,7 +28,7 @@ def product_table_data():   # this function will be used to populate the product
         with open('./data/products.csv', 'r', newline="") as file:
             reader = csv.DictReader(file)
             for i in reader:
-                product = models.Product(name=i['name'], price=i['price'], stock=random.randint(1,100))
+                product = Product(name=i['name'], price=i['price'], stock=random.randint(1,100))
                 db.session.add(product)
             db.session.commit()
 
@@ -37,6 +37,7 @@ def main(): # this is the main function that will be used to run the above funct
     create_tables()
     customer_table_data()
     product_table_data()
+    print("Tables created and data inserted successfully")
 
 if __name__ == '__main__':
     main()
