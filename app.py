@@ -70,6 +70,34 @@ def update_customer(id):
 def products(message = ""):
     return render_template('products.html', products = Product.query.all(), message = message)
 
+
+@app.route("/api/products", methods = ["POST"])  # this route will add a new product to the database
+def add_product():
+    data = request.get_json()
+    product = Product(name=data['name'], price=data['price'], stock=data['stock'])
+    db.session.add(product)
+    db.session.commit()
+    return products("Product added successfully!")
+
+@app.route("/api/products/<int:id>", methods = ["DELETE"])  # this route will delete a product from the database based on the id
+def delete_product(id):
+    product = db.session.query(Product).get(id)
+    db.session.delete(product)
+    db.session.commit()
+    return products("Product deleted successfully!")
+
+
+@app.route("/api/products/<int:id>", methods = ["PUT"])  # this route will update the product data based on the id
+def update_product(id):
+    data = request.get_json()
+    product = db.session.query(Product).get(id)
+    product.name = data['name']
+    product.price = data['price']
+    product.stock = data['stock']
+    db.session.commit()
+    return products("Product updated successfully!")
+
+
 # -------------------------------------------- END --------------------------------------------
 
 if __name__ == '__main__':
