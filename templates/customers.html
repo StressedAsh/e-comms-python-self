@@ -1,5 +1,7 @@
 {% extends "base.html" %} {% block content %}
-<h1>Customers</h1>
+<h1 class="d-flex justify-content-center">Customers</h1>
+<br />
+<p class="d-flex justify-content-center">{{ message }}</p>
 <table class="table table-hover">
   <thead>
     <tr>
@@ -7,8 +9,8 @@
       <th scope="col">Customer Name</th>
       <th scope="col">Customer Phone</th>
       <th scope="col">Customer Balance</th>
-      <th scope="col">Customer Details</th>
-      <th scope="col">Delete Customer</th>
+      <th scope="col">Details</th>
+      <th scope="col">Delete</th>
     </tr>
   </thead>
   <tbody>
@@ -17,6 +19,15 @@
       <th scope="row">{{ customer.id }}</th>
       <td>{{ customer.name }}</td>
       <td>{{ customer.phone }}</td>
+      <td>{{ customer.balance }}</td>
+      <td>
+        <a
+          class="btn btn-primary"
+          href='{{url_for("customer_info_btn", id=customer.id)}}'
+        >
+          Details
+        </a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>

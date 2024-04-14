@@ -8,13 +8,10 @@
   </head>
   <body>
     <main>
-      <h1>Home</h1>
-      <p>Welcome to our ecommerce website developed by - {{ name }}</p>
-      <ul>
-        {% for element in passed_value %}
-        <li>list item :{{ element }}</li>
-        {% endfor %}
-      </ul>
+      <h1 class="d-flex justify-content-center">Home</h1>
+      <p class="d-flex justify-content-center">
+        Welcome to our ecommerce website developed by - {{ name }}
+      </p>
     </main>
     <footer>
       <p>&copy; 2024 Ecommerce website</p>

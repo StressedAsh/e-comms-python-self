@@ -1,0 +1,27 @@
+{% extends "base.html" %} {% block content %}
+<h1 class="d-flex justify-content-center">Customer Info</h1>
+<br />
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Customer ID</th>
+      <th scope="col">Name</th>
+      <th scope="col">Phone</th>
+      <th scope="col">Balance</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">{{customer.id}}</th>
+      <td>{{customer.name}}</td>
+      <td>{{customer.phone}}</td>
+      {% if customer.balance < 0 %}
+      <td class="text-danger">{{ customer.balance }}</td>
+      {% else %}
+      <td class="text-success">{{ customer.balance }}</td>
+      {% endif %}
+    </tr>
+  </tbody>
+</table>
+<a class="btn btn-primary" href="{{url_for('customers')}}">Back</a>
+{% endblock %}

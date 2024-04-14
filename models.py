@@ -8,6 +8,14 @@ class Customer(db.Model):
     name = mapped_column(String(100), nullable=False)
     phone = mapped_column(String(10), nullable=False)
     balance  = mapped_column(DECIMAL(10,2), nullable=False, default = 0)
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "phone": self.phone,
+            "balance": self.balance,
+        }
     
 class Product(db.Model):
     id = mapped_column(Integer, primary_key=True)
