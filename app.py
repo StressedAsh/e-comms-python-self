@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from db import db
+import requests
 from models import Product, Customer
 import csv
 from pathlib import Path
@@ -35,34 +36,64 @@ def customer_info(id):
 @app.route("/api/customers", methods = ["GET"])  # this route will return a customer html using button
 def customer_info_btn():
     id = request.args.get('id')
-    customer_data = db.session.query(Customer).get(id)
+    customer_data = db.get_or_404(Customer,id)
     return render_template("customer.html",customer=customer_data)
 
 
 @app.route("/api/customers", methods = ["POST"])  # this route will add a new customer to the database
 def add_customer():
     data = request.get_json()
+    if data == None:   
+        return customers("You must provide data to add a customer! Adding customer was unsuccessful!"), 400
+    
+    if 'name' not in data or 'phone' not in data:
+        return customers("All fields are required! Adding customer was unsuccessful!"), 400
+    
+    elif data["name"] == type(str) or data["phone"] == type(str):
+        return customers("Name and phone must be string! Adding customer was unsuccessful!"), 400
+
+    if "balance" not in data:
+        data['balance'] = 0
+    
+    elif data["balance"] == type(int) or data["balance"] == type(str):
+        return customers("Balance must be float! Adding customer was unsuccessful!"), 400
+
+    elif data["balance"] < 0:
+        return customers("Balance must be positive! Adding customer was unsuccessful!"), 400
+
+    elif len(data['phone']) != 10:
+        return customers("Phone number must be 10 digits long! Adding customer was unsuccessful!"), 400
+    
     customer = Customer(name=data['name'], phone=data['phone'], balance=data['balance'])
     db.session.add(customer)
     db.session.commit()
-    return customers("Customer added successfully!")
+    return customers("Customer added successfully!"), 201
 
 @app.route("/api/customers/<int:id>", methods = ["DELETE"]) # this route will delete a customer from the database based on the id
 def delete_customer(id):
+    if id == None:
+        return customers("All fields are required! Delete was unsuccessful!"), 404
     customer = db.session.query(Customer).get(id)
     db.session.delete(customer)
     db.session.commit()
-    return customers("Customer deleted successfully!")
+    return customers("Customer deleted successfully!"), 204
+
 
 @app.route("/api/customers/<int:id>", methods = ["PUT"])  # this route will update the customer data based on the id
-def update_customer(id):
+def update_customer_balance(id):
     data = request.get_json()
+    if data == None:
+        return customers("Some data is required for updating the customer. Update was unsuccessful!"), 400
     customer = db.session.query(Customer).get(id)
-    customer.name = data['name']
-    customer.phone = data['phone']
-    customer.balance = data['balance']
+    if len(data) != 1:
+        return customers("Only balance can be updated! Update was unsuccessful"), 400
+    elif 'balance' not in data:
+        return customers("Only balance can be updated! Update was unsuccessful!"), 400
+    else:
+        customer.balance = data['balance']
     db.session.commit()
-    return customers("Customer updated successfully!")
+    return customers('Customer updated successfully!'), 204
+
 
 # -------------------------------------------- PRODUCTS --------------------------------------------
 

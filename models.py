@@ -14,7 +14,7 @@ class Customer(db.Model):
             "id": self.id,
             "name": self.name,
             "phone": self.phone,
-            "balance": self.balance,
+            "balance": self.balance
         }
     
 class Product(db.Model):
