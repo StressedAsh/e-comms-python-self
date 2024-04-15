@@ -49,13 +49,13 @@ def add_customer():
     if 'name' not in data or 'phone' not in data:
         return customers("All fields are required! Adding customer was unsuccessful!"), 400
     
-    elif data["name"] == type(str) or data["phone"] == type(str):
+    elif type(data["name"]) == str or type(data["phone"]) == str:
         return customers("Name and phone must be string! Adding customer was unsuccessful!"), 400
 
     if "balance" not in data:
         data['balance'] = 0
     
-    elif data["balance"] == type(int) or data["balance"] == type(str):
+    elif type(data["balance"]) == int or type(data["balance"]) == str:
         return customers("Balance must be float! Adding customer was unsuccessful!"), 400
 
     elif data["balance"] < 0:
@@ -73,7 +73,7 @@ def add_customer():
 def delete_customer(id):
     if id == None:
         return customers("All fields are required! Delete was unsuccessful!"), 404
-    customer = db.session.query(Customer).get(id)
+    customer = db.get_or_404(Customer, id)
     db.session.delete(customer)
     db.session.commit()
     return customers("Customer deleted successfully!"), 204
@@ -84,11 +84,15 @@ def update_customer_balance(id):
     data = request.get_json()
     if data == None:
         return customers("Some data is required for updating the customer. Update was unsuccessful!"), 400
-    customer = db.session.query(Customer).get(id)
+    customer = db.get_or_404(id)
     if len(data) != 1:
         return customers("Only balance can be updated! Update was unsuccessful"), 400
     elif 'balance' not in data:
         return customers("Only balance can be updated! Update was unsuccessful!"), 400
+    elif type(data['balance']) != float:
+        return customers("Balance must be float! Update was unsuccessful!"), 400
+    elif data['balance'] < 0:
+        return customers("Balance must be positive! Update was unsuccessful!"), 400
     else:
         customer.balance = data['balance']
     db.session.commit()
@@ -105,28 +109,66 @@ def products(message = ""):
 @app.route("/api/products", methods = ["POST"])  # this route will add a new product to the database
 def add_product():
     data = request.get_json()
+    if data == None:
+        return products("You must provide data to add a product! Adding product was unsuccessful!"), 400
+    
+    elif "name" not in data or "price" not in data:
+        return products("All fields are required! Adding product was unsuccessful!"), 400
+    
+    elif not isinstance(data["name"], str) or not isinstance(data["price"], float):
+        return products("Name must be string and price must be float! Adding product was unsuccessful!"), 400
+    
+    elif "stock" not in data:
+        data['stock'] = 0
+
+    elif type(data["stock"]) != int:
+        return products("Stock must be integer! Adding product was unsuccessful!"), 400
+    
+    elif data["stock"] < 0:
+        return products("Stock must be positive! Adding product was unsuccessful!"), 400
+
     product = Product(name=data['name'], price=data['price'], stock=data['stock'])
     db.session.add(product)
     db.session.commit()
-    return products("Product added successfully!")
+    return products("Product added successfully!"), 201
+
 
 @app.route("/api/products/<int:id>", methods = ["DELETE"])  # this route will delete a product from the database based on the id
 def delete_product(id):
-    product = db.session.query(Product).get(id)
+    product = db.get_or_404(Product,id)
     db.session.delete(product)
     db.session.commit()
-    return products("Product deleted successfully!")
+    return products("Product deleted successfully!"), 204
 
 
 @app.route("/api/products/<int:id>", methods = ["PUT"])  # this route will update the product data based on the id
 def update_product(id):
+    if id == None:
+        return products("All fields are required! Update was unsuccessful!"), 400
     data = request.get_json()
-    product = db.session.query(Product).get(id)
-    product.name = data['name']
-    product.price = data['price']
-    product.stock = data['stock']
+    product = db.get_or_404(Product, id)
+    if "name" not in data and "price" not in data and "stock" not in data:
+        return products("All fields are required! Update was unsuccessful!"), 400
+    
+    elif "name" in data and not isinstance(data["name"], str):
+        return products("Name must be string! Update was unsuccessful!"), 400
+    
+    elif "price" in data and not isinstance(data["price"], float):
+        return products("Price must be float! Update was unsuccessful!"), 400
+    
+    elif "stock" in data and not isinstance(data["stock"], int):
+        return products("Stock must be integer! Update was unsuccessful!"), 400
+
+    if "name" in data:
+        product.name = data['name']
+    if "price" in data:
+        product.price = data['price']
+    if "stock" in data:
+        product.stock = data['stock']
+
     db.session.commit()
-    return products("Product updated successfully!")
+    print(product.name)
+    return products("Product updated successfully!"), 204
 
 
 # -------------------------------------------- END --------------------------------------------
