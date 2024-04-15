@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from db import db
 import requests
-from models import Product, Customer
+from models import Product, Customer, Order, ProductOrder
 import csv
 from pathlib import Path
 
@@ -52,6 +52,9 @@ def add_customer():
     elif type(data["name"]) == str or type(data["phone"]) == str:
         return customers("Name and phone must be string! Adding customer was unsuccessful!"), 400
 
+    elif len(data["name"]) == 0:
+        return customers("Name must not be empty! Adding customer was unsuccessful!"), 400
+
     if "balance" not in data:
         data['balance'] = 0
     
@@ -61,7 +64,7 @@ def add_customer():
     elif data["balance"] < 0:
         return customers("Balance must be positive! Adding customer was unsuccessful!"), 400
 
-    elif len(data['phone']) != 10:
+    elif len(data['phone']) != 20:
         return customers("Phone number must be 10 digits long! Adding customer was unsuccessful!"), 400
     
     customer = Customer(name=data['name'], phone=data['phone'], balance=data['balance'])
@@ -71,8 +74,6 @@ def add_customer():
 
 @app.route("/api/customers/<int:id>", methods = ["DELETE"]) # this route will delete a customer from the database based on the id
 def delete_customer(id):
-    if id == None:
-        return customers("All fields are required! Delete was unsuccessful!"), 404
     customer = db.get_or_404(Customer, id)
     db.session.delete(customer)
     db.session.commit()
@@ -82,8 +83,6 @@ def delete_customer(id):
 @app.route("/api/customers/<int:id>", methods = ["PUT"])  # this route will update the customer data based on the id
 def update_customer_balance(id):
     data = request.get_json()
-    if data == None:
-        return customers("Some data is required for updating the customer. Update was unsuccessful!"), 400
     customer = db.get_or_404(id)
     if len(data) != 1:
         return customers("Only balance can be updated! Update was unsuccessful"), 400
@@ -117,6 +116,9 @@ def add_product():
     
     elif not isinstance(data["name"], str) or not isinstance(data["price"], float):
         return products("Name must be string and price must be float! Adding product was unsuccessful!"), 400
+    
+    elif len(data["name"]) == 0:
+        return products("Name must not be empty! Adding product was unsuccessful!"), 400
     
     elif "stock" not in data:
         data['stock'] = 0
@@ -159,6 +161,15 @@ def update_product(id):
     elif "stock" in data and not isinstance(data["stock"], int):
         return products("Stock must be integer! Update was unsuccessful!"), 400
 
+    elif "stock" in data and data["stock"] < 0:
+        return products("Stock must be positive! Update was unsuccessful!"), 400
+
+    elif "price" in data and data["price"] < 0:
+        return products("Price must be positive! Update was unsuccessful!"), 400
+    
+    elif "name" in data and len(data["name"]) == 0:
+        return products("Name must not be empty! Update was unsuccessful!"), 400
+
     if "name" in data:
         product.name = data['name']
     if "price" in data:
@@ -170,6 +181,57 @@ def update_product(id):
     print(product.name)
     return products("Product updated successfully!"), 204
 
+
+# -------------------------------------------- ORDER --------------------------------------------
+
+@app.route("/orders")  # this route will display all the orders in the database
+def orders(message = ""):
+    return render_template('orders.html', orders = Order.query.all(), message = message)
+
+
+@app.route("/api/orders/<int:id>", methods = ["GET"])  # this route will show the order details based on the id
+def order_info(id):
+    order = db.get_or_404(Order, id)
+    return render_template("order.html", order=order)
+
+
+@app.route("/api/orders/<int:id>", methods = ["DELETE"])  # this route will delete an order from the database based on the id
+def delete_order(id):
+    order = db.get_or_404(Order, id)
+    db.session.delete(order)
+    db.session.commit()
+    return orders(), 204
+
+
+@app.route("/api/orders", methods = ["POST"])  # this route will add a new order to the database
+def add_order():
+    data = request.get_json()
+    if data == None:
+        return orders("You must provide data to add an order! Adding order was unsuccessful!"), 400
+    
+    elif "customer_id" not in data or not isinstance(data["customer_id"], int):
+        return orders("Customer id is required/should be the right data type! Adding order was unsuccessful!"), 400
+    
+    elif "items" not in data or not isinstance(data["items"], list) or len(data["items"]) == 0:
+        return orders("Items must be a list! Adding order was unsuccessful!"), 400
+
+    customer_id = data["customer_id"]
+    customer = db.get_or_404(Customer, customer_id)
+    order = Order(customer=customer)
+    db.session.add(order)
+    for i in data["items"]:
+        product_name = i["product_name"]
+        statement_product = db.select(Product).where(Product.name == product_name).limit(1)
+        product = db.session.execute(statement_product).scalar()    
+        if product is None:
+            continue
+        product = db.get_or_404(Product, product.id)
+        
+        quantity = i["quantity"]
+        product_order = ProductOrder(order=order, product=product, quantity=quantity)
+        db.session.add(product_order)
+    db.session.commit()
+    return orders("Order added successfully!"), 201
 
 # -------------------------------------------- END --------------------------------------------
 

@@ -1,24 +1,36 @@
-from sqlalchemy import Boolean, Float, Numeric, ForeignKey, Integer, String, Column, DECIMAL, DateTime, func
+from sqlalchemy import (
+    Boolean,
+    Float,
+    Numeric,
+    ForeignKey,
+    Integer,
+    String,
+    Column,
+    DECIMAL,
+    DateTime,
+)
 from sqlalchemy.orm import relationship, mapped_column
+from sqlalchemy.sql import functions as func
+from db import db
 import math
-import datetime
-from db import db 
+
 
 class Customer(db.Model):
-    id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name = mapped_column(String(200), nullable=False)
-    phone = mapped_column(String(20), nullable=False)
-    balance  = mapped_column(DECIMAL(10,2), nullable=False, default = 0)
-    orders = relationship("Order", cascade="all, delete-orphan")
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String(100), nullable=False)
+    phone = mapped_column(String(10), nullable=False)
+    balance = mapped_column(DECIMAL(10, 2), nullable=False, default=0)
+    orders = relationship("Order")
 
     def to_json(self):
         return {
             "id": self.id,
             "name": self.name,
             "phone": self.phone,
-            "balance": self.balance
+            "balance": self.balance,
         }
-    
+
+
 class Product(db.Model):
     id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String(100), nullable=False)
@@ -39,12 +51,11 @@ class Order(db.Model):
     processed = mapped_column(DateTime, default=None, nullable=True)
 
     def total(self):
-        total_value = 0
+        total = 0
         for item in self.items:
-            total_value += item.product.price * item.quantity
-        self.total_value = round(total_value)
-        return total_value
-
+            total += item.product.price * item.quantity
+        math.floor(total)
+        return total
 
     # def process(self, method):
     #     if self.processed is not None:
@@ -72,6 +83,7 @@ class Order(db.Model):
     #     db.session.commit()
     #     print(self.customer.balance)
     #     return True
+
 
 class ProductOrder(db.Model):
     id = mapped_column(Integer, primary_key=True)
